@@ -33,37 +33,11 @@ export function MediaUploader({ eventId, onUploadComplete }) {
     }
   });
 
-  const applyWatermark = async (file) => {
-    if (!file.type.startsWith("image/")) return file;
-    
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        
-        ctx.drawImage(img, 0, 0);
-        
-        // Add watermark
-        ctx.font = `bold ${Math.max(20, img.width / 30)}px Inter, sans-serif`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.textAlign = "right";
-        ctx.textBaseline = "bottom";
-        ctx.fillText("EventLens", img.width - 20, img.height - 20);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const newFile = new File([blob], file.name, { type: file.type });
-            resolve(newFile);
-          } else {
-            resolve(file); // Fallback
-          }
-        }, file.type, 0.9);
-      };
-      img.src = URL.createObjectURL(file);
-    });
+  const calculateHash = async (file) => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
   const uploadFiles = async () => {
@@ -72,10 +46,9 @@ export function MediaUploader({ eventId, onUploadComplete }) {
     let uploadedCount = 0;
 
     try {
-      for (const originalFile of files) {
-        // Apply watermark if image
-        const file = await applyWatermark(originalFile);
-
+      for (const file of files) {
+        // Calculate hash for duplicate detection
+        const fileHash = await calculateHash(file);
         // 1. Get presigned URL
         const res = await fetch("/api/upload", {
           method: "POST",
@@ -100,15 +73,19 @@ export function MediaUploader({ eventId, onUploadComplete }) {
           }
         });
 
-        if (!uploadRes.ok) throw new Error(`Failed to upload ${file.name}`);
+        if (!uploadRes.ok) throw new Error(`Failed to upload to S3`);
 
-        // 3. Save record to DB
-        await saveMediaRecord({
+        // 3. Save record to database via Server Action
+        const actionRes = await saveMediaRecord({
           eventId,
           url: publicUrl,
           key,
-          type: file.type.startsWith("video/") ? "VIDEO" : "IMAGE"
+          type: file.type.startsWith("video/") ? "VIDEO" : "IMAGE",
+          caption: "",
+          hash: fileHash
         });
+
+        if (!actionRes.success) throw new Error(actionRes.error || "Failed to save record");
 
         uploadedCount++;
         setProgress(Math.round((uploadedCount / files.length) * 100));

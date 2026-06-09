@@ -4,6 +4,10 @@ import { CalendarIcon, MapPin, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { MediaUploader } from "@/components/media-uploader";
 import { EventGallery } from "@/components/event-gallery";
+import { EventAccessManager } from "@/components/event-access-manager";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/lib/prisma";
 
 export default async function EventDetailPage({ params }) {
   const { id: eventId } = await params;
@@ -12,6 +16,43 @@ export default async function EventDetailPage({ params }) {
   if (!event) {
     notFound();
   }
+
+  // Access Control Check
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  
+  let isAuthorized = event.visibility === "PUBLIC" || event.organizerId === userId;
+  let userEventRole = null;
+
+  if (!isAuthorized && userId) {
+    const eventRole = await prisma.eventRole.findUnique({
+      where: {
+        userId_eventId: {
+          userId,
+          eventId
+        }
+      }
+    });
+    if (eventRole) {
+      isAuthorized = true;
+      userEventRole = eventRole.role;
+    }
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+          <span className="text-3xl">🔒</span>
+        </div>
+        <h1 className="text-2xl font-bold text-white mb-2">Private Event</h1>
+        <p className="text-[#8B8B8B]">You do not have permission to view this event's media.</p>
+      </div>
+    );
+  }
+
+  const isOrganizer = event.organizerId === userId;
+  const isEventAdmin = isOrganizer || userEventRole === "ADMIN";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -55,6 +96,12 @@ export default async function EventDetailPage({ params }) {
               </div>
               <span>Organized by <span className="text-white">{event.organizer?.name || "User"}</span></span>
             </div>
+
+            {isEventAdmin && (
+              <div className="ml-auto">
+                <EventAccessManager eventId={event.id} initialVisibility={event.visibility} />
+              </div>
+            )}
           </div>
         </div>
       </div>

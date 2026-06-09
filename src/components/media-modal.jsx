@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Send, X, Download } from "lucide-react";
@@ -89,12 +89,13 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 overflow-hidden bg-[#0A0A0A] border-white/[0.08] flex flex-col md:flex-row rounded-2xl [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:max-w-[95vw] md:max-w-[85vw] lg:max-w-6xl xl:max-w-[1400px] h-[90vh] p-0 overflow-hidden bg-[#0A0A0A] border-white/[0.08] flex flex-col md:flex-row rounded-2xl [&>button]:hidden">
         {/* Visually hidden Title for accessibility */}
         <DialogTitle className="sr-only">Media View</DialogTitle>
+        <DialogDescription className="sr-only">Media details</DialogDescription>
         
         {/* Left Side: Media Display */}
-        <div className="relative flex-1 bg-black flex items-center justify-center min-h-[40vh] md:min-h-full overflow-hidden group">
+        <div className="relative flex-1 min-w-[20%]  bg-black flex items-center justify-center min-h-[40vh] md:h-full overflow-hidden group">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -104,7 +105,7 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
             <X className="w-5 h-5" />
           </Button>
 
-          {initialType === "IMAGE" ? (
+          {(details?.type || initialType) === "IMAGE" ? (
             <img 
               src={details?.url || initialUrl} 
               alt="Event Media" 
@@ -120,18 +121,18 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
 
           {/* Download Button Overlay */}
           <a 
-            href={details?.url || initialUrl} 
+            href={`/api/media/${mediaId}/download`}
             download 
             target="_blank" 
             rel="noreferrer"
-            className="absolute top-4 right-4 z-50 p-2 bg-black/50 text-white hover:bg-[#E8FF00] hover:text-black rounded-full backdrop-blur-md transition-colors opacity-0 group-hover:opacity-100"
+            className="absolute top-4 right-4 z-50 p-3 bg-black/50 text-white hover:bg-[#E8FF00] hover:text-black rounded-full backdrop-blur-md transition-colors"
           >
             <Download className="w-5 h-5" />
           </a>
         </div>
 
         {/* Right Side: Interactions */}
-        <div className="w-full md:w-[380px] lg:w-[420px] flex flex-col h-full bg-[#141414] border-l border-white/[0.08]">
+        <div className="w-full md:w-[380px] lg:w-[420px] flex flex-col flex-1 md:flex-none md:h-full bg-[#141414] border-l border-white/[0.08]">
           <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#E8FF00] flex items-center justify-center text-black text-sm font-bold">

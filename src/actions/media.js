@@ -9,11 +9,18 @@ import { pusherServer } from "@/lib/pusher";
 
 export async function saveMediaRecord(data) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
+  if (!session?.user) throw new Error("Unauthorized");
 
-  const { eventId, url, key, type, caption } = data;
+  const { eventId, url, key, type, caption, hash } = data;
+
+  if (hash) {
+    const existing = await prisma.media.findFirst({
+      where: { hash }
+    });
+    if (existing) {
+      return { success: false, error: "This image has already been uploaded." };
+    }
+  }
 
   const mediaData = {
     url,
@@ -22,6 +29,7 @@ export async function saveMediaRecord(data) {
     caption,
     eventId,
     uploaderId: session.user.id,
+    hash,
   };
 
   let aiTags = [];

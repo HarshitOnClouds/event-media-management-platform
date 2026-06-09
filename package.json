@@ -24,6 +24,7 @@
     "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
     "imghash": "^1.1.4",
+    "jimp": "^1.6.1",
     "lucide-react": "^1.17.0",
     "nanoid": "^5.1.11",
     "next": "16.2.7",

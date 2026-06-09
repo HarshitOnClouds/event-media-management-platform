@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum EventRoleType {
   ADMIN
   PHOTOGRAPHER
   CLUB_MEMBER
@@ -29,7 +29,6 @@ model User {
   email         String?   @unique
   password      String?
   image         String?
-  role          Role      @default(VIEWER)
   // Relations
   events        Event[]   // Events created by the user
   media         Media[]   // Media uploaded by the user
@@ -37,6 +36,7 @@ model User {
   likes         Like[]
   favorites     Favorite[]
   faceEmbedding FaceEmbedding?
+  eventRoles    EventRole[]
 }
 
 model Event {
@@ -54,6 +54,18 @@ model Event {
   organizer   User     @relation(fields: [organizerId], references: [id])
   albums      Album[]
   media       Media[]
+  roles       EventRole[]
+}
+
+model EventRole {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  role      EventRoleType
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
 }
 
 model Album {

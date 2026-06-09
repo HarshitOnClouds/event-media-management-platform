@@ -39,12 +39,33 @@ export async function createEvent(formData) {
 }
 
 export async function getEvents() {
-  return await prisma.event.findMany({
-    orderBy: { date: "desc" },
+  const session = await getServerSession(authOptions);
+  let userId = session?.user?.id;
+
+  const events = await prisma.event.findMany({
+    orderBy: {
+      date: "asc",
+    },
     include: {
-      organizer: { select: { name: true, image: true } },
-      _count: { select: { media: true } }
-    }
+      organizer: {
+        select: { name: true },
+      },
+      roles: {
+        where: { userId: userId || "NONE" }
+      },
+      _count: {
+        select: { media: true },
+      },
+    },
+  });
+
+  // Filter events: PUBLIC, or user is organizer, or user has an EventRole
+  return events.filter(event => {
+    if (event.visibility === "PUBLIC") return true;
+    if (!userId) return false; // Private and not logged in
+    if (event.organizerId === userId) return true; // Organizer has access
+    if (event.roles.length > 0) return true; // User has an explicit role (ADMIN, MEMBER, etc.)
+    return false;
   });
 }
 
@@ -63,4 +84,33 @@ export async function getEventById(id) {
       }
     }
   });
+}
+
+export async function updateEventVisibility(eventId, visibility) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: { roles: { where: { userId: session.user.id } } }
+  });
+
+  if (!event) throw new Error("Event not found");
+
+  const isOrganizer = event.organizerId === session.user.id;
+  const isEventAdmin = event.roles.some(r => r.role === "ADMIN");
+
+  if (!isOrganizer && !isEventAdmin) {
+    throw new Error("Only the organizer or an event admin can change visibility.");
+  }
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { visibility }
+  });
+
+  revalidatePath(`/events/${eventId}`);
+  revalidatePath("/events");
+  
+  return { success: true };
 }

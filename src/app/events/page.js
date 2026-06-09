@@ -3,6 +3,8 @@ import { getEvents } from "@/actions/events";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, MapPin, Users, PlusSquare } from "lucide-react";
 import { format } from "date-fns";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function EventsPage() {
   const events = await getEvents();

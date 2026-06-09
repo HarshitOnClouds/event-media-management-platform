@@ -46,3 +46,31 @@ export async function getMyProfile() {
     include: { faceEmbedding: true }
   });
 }
+
+export async function getMyPhotos() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  // The AI tags the person as PERSON_{userId}
+  const tagToLookFor = `PERSON_${session.user.id}`;
+
+  const media = await prisma.media.findMany({
+    where: {
+      tags: {
+        some: {
+          name: tagToLookFor
+        }
+      }
+    },
+    include: {
+      uploader: { select: { name: true } },
+      tags: true,
+      event: { select: { title: true } }
+    },
+    orderBy: {
+      id: "desc"
+    }
+  });
+
+  return media;
+}

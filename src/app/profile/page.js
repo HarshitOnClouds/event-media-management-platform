@@ -5,13 +5,15 @@ import { useSession } from "next-auth/react";
 import { Camera, Upload, Loader2, UserRoundCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getMyProfile, saveSelfie } from "@/actions/face";
+import { getMyProfile, saveSelfie, getMyPhotos } from "@/actions/face";
 import Image from "next/image";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [profile, setProfile] = useState(null);
+  const [myPhotos, setMyPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -19,6 +21,10 @@ export default function ProfilePage() {
       getMyProfile().then(p => {
         setProfile(p);
         setLoading(false);
+      });
+      getMyPhotos().then(photos => {
+        setMyPhotos(photos);
+        setLoadingPhotos(false);
       });
     }
   }, [session]);
@@ -127,6 +133,54 @@ export default function ProfilePage() {
                 <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
               </label>
             </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Photos of You Section */}
+      <div className="mt-12 bg-[#141414] border border-white/[0.08] rounded-3xl p-8">
+        <h2 className="text-xl font-bold text-white mb-6">Photos of You</h2>
+        
+        {loadingPhotos ? (
+          <div className="flex items-center gap-2 text-[#8B8B8B]">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading photos...
+          </div>
+        ) : myPhotos.length === 0 ? (
+          <div className="text-center text-[#8B8B8B] py-12 border-2 border-dashed border-white/[0.1] rounded-2xl">
+            {profile?.faceEmbedding 
+              ? "We haven't spotted you in any event photos yet. Check back later!" 
+              : "Upload your selfie above to enable AI detection!"}
+          </div>
+        ) : (
+          <div className="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4">
+            {myPhotos.map((m) => (
+              <a 
+                key={m.id} 
+                href={`/events/${m.eventId}`}
+                className="relative group break-inside-avoid rounded-xl overflow-hidden bg-[#141414] border border-white/[0.08] cursor-pointer block"
+              >
+                {m.type === "IMAGE" ? (
+                  <img 
+                    src={m.url} 
+                    alt="Event media" 
+                    className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <video src={m.url} className="w-full h-auto" />
+                )}
+                
+                {/* Overlay Metadata */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <span className="text-white text-sm font-medium drop-shadow-md">
+                    {m.event?.title}
+                  </span>
+                  <span className="text-[#E8FF00] text-xs font-bold mt-1">
+                    View Event &rarr;
+                  </span>
+                </div>
+              </a>
+            ))}
           </div>
         )}
       </div>
