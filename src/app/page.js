@@ -5,9 +5,15 @@ import { CalendarIcon, MapPin, Users, PlusSquare } from "lucide-react";
 import { format } from "date-fns";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { EventControls } from "@/components/event-controls";
 
-export default async function HomePage() {
-  const events = await getEvents();
+export default async function HomePage({ searchParams }) {
+  const resolvedParams = await searchParams;
+  const sort = resolvedParams?.sort || "date";
+  const order = resolvedParams?.order || "desc";
+  const category = resolvedParams?.category || "all";
+
+  const events = await getEvents({ sort, order, category });
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
@@ -23,6 +29,8 @@ export default async function HomePage() {
           </Button>
         </Link>
       </div>
+
+      <EventControls />
 
       {events.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 border border-white/[0.08] rounded-3xl bg-[#141414]/50 border-dashed">

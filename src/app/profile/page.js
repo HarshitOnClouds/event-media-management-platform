@@ -6,11 +6,14 @@ import { Camera, Upload, Loader2, UserRoundCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getMyProfile, saveSelfie, getMyPhotos } from "@/actions/face";
+import { getUserAnalytics } from "@/actions/analytics";
 import Image from "next/image";
+import { BarChart3, Heart, MessageCircle, Image as ImageIcon, Calendar } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [profile, setProfile] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
   const [myPhotos, setMyPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
@@ -26,6 +29,7 @@ export default function ProfilePage() {
         setMyPhotos(photos);
         setLoadingPhotos(false);
       });
+      getUserAnalytics().then(stats => setAnalytics(stats));
     }
   }, [session]);
 
@@ -78,6 +82,38 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold text-white mb-8">My Profile</h1>
+
+      {/* Analytics Dashboard */}
+      {analytics && (
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <BarChart3 className="text-[#E8FF00]" />
+            My Impact
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[#141414] border border-white/[0.08] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+              <ImageIcon className="w-6 h-6 text-[#8B8B8B] mb-2" />
+              <div className="text-2xl font-bold text-white">{analytics.totalUploads}</div>
+              <div className="text-xs text-[#8B8B8B] uppercase tracking-wider mt-1">Uploads</div>
+            </div>
+            <div className="bg-[#141414] border border-white/[0.08] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+              <Heart className="w-6 h-6 text-red-500 mb-2 fill-red-500/20" />
+              <div className="text-2xl font-bold text-white">{analytics.totalLikesReceived}</div>
+              <div className="text-xs text-[#8B8B8B] uppercase tracking-wider mt-1">Likes Rcvd</div>
+            </div>
+            <div className="bg-[#141414] border border-white/[0.08] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+              <MessageCircle className="w-6 h-6 text-blue-400 mb-2 fill-blue-400/20" />
+              <div className="text-2xl font-bold text-white">{analytics.totalCommentsReceived}</div>
+              <div className="text-xs text-[#8B8B8B] uppercase tracking-wider mt-1">Comments Rcvd</div>
+            </div>
+            <div className="bg-[#141414] border border-white/[0.08] rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+              <Calendar className="w-6 h-6 text-[#E8FF00] mb-2" />
+              <div className="text-2xl font-bold text-white">{analytics.eventsOrganized}</div>
+              <div className="text-xs text-[#8B8B8B] uppercase tracking-wider mt-1">Events Hosted</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-[#141414] border border-white/[0.08] rounded-3xl p-8">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">

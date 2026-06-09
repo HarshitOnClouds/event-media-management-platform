@@ -65,6 +65,32 @@ export async function addComment(mediaId, eventId, content) {
     }
   });
 
+  // Extract @mentions
+  const mentions = content.match(/@([a-zA-Z0-9_]+)/g);
+  if (mentions) {
+    for (const mention of mentions) {
+      const username = mention.slice(1); // remove @
+      const users = await prisma.user.findMany({
+        where: {
+          name: { contains: username, mode: "insensitive" },
+          id: { not: session.user.id } // don't notify self
+        },
+        take: 1 // taking first match
+      });
+
+      if (users.length > 0) {
+        const taggedUser = users[0];
+        await prisma.notification.create({
+          data: {
+            userId: taggedUser.id,
+            type: "TAG",
+            message: `${session.user.name} tagged you in a comment: "${content}"`
+          }
+        });
+      }
+    }
+  }
+
   const media = await prisma.media.findUnique({ where: { id: mediaId } });
   
   // Send notification if the commenter is not the uploader

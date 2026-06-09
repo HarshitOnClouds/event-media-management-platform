@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { MediaUploader } from "@/components/media-uploader";
 import { EventGallery } from "@/components/event-gallery";
 import { EventAccessManager } from "@/components/event-access-manager";
+import { QrShareButton } from "@/components/qr-share-button";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
@@ -66,9 +67,13 @@ export default async function EventDetailPage({ params }) {
         </div>
 
         <div className="container mx-auto px-4 pb-12 relative z-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/[0.08] text-[#E8FF00] text-xs font-bold mb-4">
-            <Tag className="w-3 h-3" />
-            {event.category || "General Event"}
+          <div className="flex items-center justify-between mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/[0.08] text-[#E8FF00] text-xs font-bold">
+              <Tag className="w-3 h-3" />
+              {event.category || "General Event"}
+            </div>
+            
+            <QrShareButton eventTitle={event.title} />
           </div>
           
           <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4 tracking-tight">

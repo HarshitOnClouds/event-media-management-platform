@@ -38,14 +38,25 @@ export async function createEvent(formData) {
   return { success: true, eventId: event.id };
 }
 
-export async function getEvents() {
+export async function getEvents({ sort = "date", order = "desc", category = "all" } = {}) {
   const session = await getServerSession(authOptions);
   let userId = session?.user?.id;
 
+  let orderBy = {};
+  if (sort === "name") {
+    orderBy = { title: order };
+  } else {
+    orderBy = { date: order };
+  }
+
+  let where = {};
+  if (category && category !== "all") {
+    where = { category };
+  }
+
   const events = await prisma.event.findMany({
-    orderBy: {
-      date: "asc",
-    },
+    where,
+    orderBy,
     include: {
       organizer: {
         select: { name: true },
