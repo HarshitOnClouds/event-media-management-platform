@@ -34,7 +34,7 @@ export async function createEvent(formData) {
     },
   });
 
-  revalidatePath("/events");
+  revalidatePath("/");
   return { success: true, eventId: event.id };
 }
 
@@ -110,7 +110,7 @@ export async function updateEventVisibility(eventId, visibility) {
   });
 
   revalidatePath(`/events/${eventId}`);
-  revalidatePath("/events");
+  revalidatePath("/");
   
   return { success: true };
 }

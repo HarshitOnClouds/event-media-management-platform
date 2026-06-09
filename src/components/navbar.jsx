@@ -24,9 +24,6 @@ export function Navbar() {
           {session ? (
             <>
               <SearchBar />
-              <Link href="/events" className="text-sm font-medium text-[#8B8B8B] hover:text-white transition-colors">
-                Events
-              </Link>
               <Link href="/profile" className="text-sm font-medium text-[#8B8B8B] hover:text-white transition-colors">
                 Profile
               </Link>

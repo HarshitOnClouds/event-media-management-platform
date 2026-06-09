@@ -86,12 +86,39 @@ export async function addComment(mediaId, eventId, content) {
   return { success: true, comment };
 }
 
+export async function toggleFavorite(mediaId, eventId) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const existing = await prisma.favorite.findFirst({
+    where: {
+      userId: session.user.id,
+      mediaId,
+    },
+  });
+
+  if (existing) {
+    await prisma.favorite.delete({ where: { id: existing.id } });
+  } else {
+    await prisma.favorite.create({
+      data: {
+        userId: session.user.id,
+        mediaId,
+      },
+    });
+  }
+
+  revalidatePath(`/events/${eventId}`);
+  return { success: true, favorited: !existing };
+}
+
 export async function getMediaDetails(mediaId) {
   return await prisma.media.findUnique({
     where: { id: mediaId },
     include: {
       uploader: { select: { name: true, image: true } },
       likes: true,
+      favorites: true,
       comments: {
         include: { user: { select: { name: true, image: true } } },
         orderBy: { createdAt: 'asc' }

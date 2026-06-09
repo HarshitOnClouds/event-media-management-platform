@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, Send, X, Download } from "lucide-react";
-import { toggleLike, addComment, getMediaDetails } from "@/actions/social";
+import { Heart, MessageCircle, Send, X, Download, Bookmark, Share2 } from "lucide-react";
+import { toggleLike, addComment, getMediaDetails, toggleFavorite } from "@/actions/social";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -18,6 +18,7 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
   const [commentText, setCommentText] = useState("");
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
 
   useEffect(() => {
     if (open && mediaId) {
@@ -85,7 +86,52 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
     }
   };
 
+  const handleFavorite = async () => {
+    if (!session) return toast.error("Please log in to save media");
+    try {
+      setIsFavoriting(true);
+      
+      const userId = session.user.id;
+      const isCurrentlyFavorited = details.favorites?.some(f => f.userId === userId);
+      
+      setDetails(prev => ({
+        ...prev,
+        favorites: isCurrentlyFavorited 
+          ? prev.favorites.filter(f => f.userId !== userId)
+          : [...(prev.favorites || []), { userId }]
+      }));
+
+      await toggleFavorite(mediaId, eventId);
+      toast.success(isCurrentlyFavorited ? "Removed from favorites" : "Added to favorites");
+    } catch (error) {
+      toast.error("Failed to update favorites");
+      fetchDetails();
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/events/${eventId}?media=${mediaId}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this photo on EventLens!',
+        url: url
+      }).catch((err) => {
+        if (err.name !== "AbortError") {
+          navigator.clipboard.writeText(url);
+          toast.success("Link copied to clipboard!");
+        }
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    }
+  };
+
   const isLiked = session && details?.likes?.some(l => l.userId === session.user.id);
+  const isFavorited = session && details?.favorites?.some(f => f.userId === session.user.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -191,6 +237,15 @@ export function MediaModal({ mediaId, eventId, open, onOpenChange, initialUrl, i
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-7 h-7 text-white" />
                 <span className="font-bold text-white">{details?.comments?.length || 0}</span>
+              </div>
+              
+              <div className="flex items-center gap-4 ml-auto">
+                <button onClick={handleShare} className="text-white hover:text-[#8B8B8B] transition-colors" title="Share">
+                  <Share2 className="w-6 h-6" />
+                </button>
+                <button onClick={handleFavorite} disabled={isFavoriting} className="text-white hover:text-[#8B8B8B] transition-colors" title="Save to Favorites">
+                  <Bookmark className={`w-6 h-6 transition-all ${isFavorited ? "fill-white text-white" : ""}`} />
+                </button>
               </div>
             </div>
 

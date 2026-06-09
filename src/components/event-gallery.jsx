@@ -1,11 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MediaModal } from "@/components/media-modal";
 import { CalendarIcon } from "lucide-react";
 
 export function EventGallery({ media, eventId }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const mediaId = params.get("media");
+      if (mediaId) {
+        const targetMedia = media.find(m => m.id === mediaId);
+        if (targetMedia) setSelectedMedia(targetMedia);
+      }
+    }
+  }, [media]);
+
+  const handleOpenChange = (open) => {
+    if (!open) {
+      setSelectedMedia(null);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("media");
+        window.history.replaceState({}, '', url);
+      }
+    }
+  };
 
   if (media.length === 0) {
     return (
@@ -64,7 +86,7 @@ export function EventGallery({ media, eventId }) {
 
       <MediaModal 
         open={!!selectedMedia} 
-        onOpenChange={(open) => !open && setSelectedMedia(null)}
+        onOpenChange={handleOpenChange}
         mediaId={selectedMedia?.id}
         eventId={eventId}
         initialUrl={selectedMedia?.url}

@@ -32,7 +32,7 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       toast.success("Logged in successfully");
-      router.push("/events");
+      router.push("/");
       router.refresh();
     }
   }
