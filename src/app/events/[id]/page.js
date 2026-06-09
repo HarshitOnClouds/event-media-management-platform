@@ -57,16 +57,9 @@ export default async function EventDetailPage({ params }) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Event Hero */}
-      <div className="relative w-full h-[40vh] md:h-[50vh] bg-[#141414] border-b border-white/[0.08] flex items-end">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-black/50 to-transparent z-10" />
-        
-        {/* Placeholder for Cover Image */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-          <CalendarIcon className="w-32 h-32 text-white" />
-        </div>
-
-        <div className="container mx-auto px-4 pb-12 relative z-20">
+      {/* Event Header */}
+      <div className="w-full bg-[#141414] border-b border-white/[0.08] pt-12 pb-8">
+        <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/[0.08] text-[#E8FF00] text-xs font-bold">
               <Tag className="w-3 h-3" />
@@ -76,7 +69,7 @@ export default async function EventDetailPage({ params }) {
             <QrShareButton eventTitle={event.title} />
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4 tracking-tight break-words overflow-hidden">
             {event.title}
           </h1>
           

@@ -45,19 +45,15 @@ export default async function HomePage({ searchParams }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
             <Link key={event.id} href={`/events/${event.id}`} className="group block">
-              <div className="bg-[#141414] border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-2xl hover:shadow-[#E8FF00]/5 flex flex-col h-full">
-                <div className="aspect-[4/3] bg-[#222] relative overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#141414] to-transparent z-10 opacity-60" />
-                  <CalendarIcon className="w-12 h-12 text-white/[0.1] group-hover:scale-110 transition-transform duration-500" />
-                  
-                  <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium text-[#E8FF00] border border-white/[0.08]">
+              <div className="bg-[#141414] border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.2] hover:shadow-2xl hover:shadow-[#E8FF00]/5 flex flex-col h-full p-5">
+                <div className="flex justify-between items-start gap-4 mb-3">
+                  <h3 className="text-xl font-bold text-white group-hover:text-[#E8FF00] transition-colors line-clamp-2">{event.title}</h3>
+                  <div className="bg-white/[0.05] shrink-0 px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold text-[#E8FF00] border border-white/[0.08]">
                     {event.category || "General"}
                   </div>
                 </div>
                 
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#E8FF00] transition-colors">{event.title}</h3>
-                  <p className="text-[#8B8B8B] text-sm line-clamp-2 mb-4 flex-1">
+                <p className="text-[#8B8B8B] text-sm line-clamp-2 mb-6 flex-1">
                     {event.description || "No description provided."}
                   </p>
                   
@@ -84,7 +80,6 @@ export default async function HomePage({ searchParams }) {
                     </div>
                   </div>
                 </div>
-              </div>
             </Link>
           ))}
         </div>
