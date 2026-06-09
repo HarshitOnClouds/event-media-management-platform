@@ -42,7 +42,7 @@ export default function RegisterPage() {
         redirect: false,
       });
 
-      router.push("/events");
+      router.push("/");
       router.refresh();
     } catch (error) {
       toast.error(error.message || "Failed to create account");
