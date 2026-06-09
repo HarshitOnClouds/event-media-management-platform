@@ -1,5 +1,7 @@
 # EventLens 📸
 
+**Live Demo:** [https://event-media-management-platform-zeta.vercel.app](https://event-media-management-platform-zeta.vercel.app)
+
 A full-stack, real-time Event Media Management Platform built with Next.js. EventLens allows users to organize events, share media, and automatically tag people in photos using AWS Rekognition.
 
 ## ✨ Features
@@ -25,6 +27,29 @@ A full-stack, real-time Event Media Management Platform built with Next.js. Even
 ## 🏗 Architecture
 
 EventLens uses a modern, decentralized Serverless Architecture:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Client as Next.js Client
+    participant Server as Next.js Server Actions
+    participant S3 as AWS S3
+    participant Rekognition as AWS Rekognition
+    participant DB as PostgreSQL (Neon)
+    participant Pusher as Pusher WebSockets
+
+    User->>Client: Upload Photo
+    Client->>Server: Request Presigned URL
+    Server-->>Client: Return URL & Object Key
+    Client->>S3: Direct PUT Image Data
+    S3-->>Client: 200 OK
+    Client->>Server: Action: createMedia()
+    Server->>Rekognition: Analyze Image & Faces
+    Rekognition-->>Server: FaceIDs & AI Labels
+    Server->>DB: Save Record + AI Tags
+    Server->>Pusher: Broadcast Notification
+    Pusher-->>Client: Real-time UI Update
+```
 
 - **Client Layer (Next.js App Router):** Renders dynamic React Server Components and interactive Client Components. State is managed via React Hooks, with UI from shadcn/ui and Tailwind CSS.
 - **Server Layer (Next.js Server Actions):** Handles secure data mutations, direct database queries, and server-side authentication (NextAuth).
