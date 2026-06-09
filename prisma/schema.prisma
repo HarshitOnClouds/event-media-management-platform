@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  CLUB_MEMBER
+  VIEWER
+}
+
+enum EventVisibility {
+  PUBLIC
+  PRIVATE
+  INVITE_ONLY
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  image         String?
+  role          Role      @default(VIEWER)
+  // Relations
+  events        Event[]   // Events created by the user
+  media         Media[]   // Media uploaded by the user
+  comments      Comment[]
+  likes         Like[]
+  favorites     Favorite[]
+  faceEmbedding FaceEmbedding?
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  tags        String[]
+  visibility  EventVisibility @default(PUBLIC)
+  date        DateTime
+  location    String?
+  coverImage  String?
+  // Relations
+  organizerId String
+  organizer   User     @relation(fields: [organizerId], references: [id])
+  albums      Album[]
+  media       Media[]
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  name      String
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  media     Media[]
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  url         String   // S3 URL
+  key         String   // S3 Object Key
+  type        String   // IMAGE or VIDEO
+  hash        String?  // For duplicate detection
+  caption     String?
+  // Relations
+  uploaderId  String
+  uploader    User     @relation(fields: [uploaderId], references: [id])
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  albumId     String?
+  album       Album?   @relation(fields: [albumId], references: [id])
+  tags        MediaTag[]
+  likes       Like[]
+  comments    Comment[]
+  favorites   Favorite[]
+}
+
+model MediaTag {
+  id        String @id @default(cuid())
+  name      String
+  mediaId   String
+  media     Media  @relation(fields: [mediaId], references: [id])
+  confidence Float?
+}
+
+model Like {
+  id      String @id @default(cuid())
+  userId  String
+  mediaId String
+  user    User   @relation(fields: [userId], references: [id])
+  media   Media  @relation(fields: [mediaId], references: [id])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+  mediaId   String
+  user      User     @relation(fields: [userId], references: [id])
+  media     Media    @relation(fields: [mediaId], references: [id])
+}
+
+model Favorite {
+  id      String @id @default(cuid())
+  userId  String
+  mediaId String
+  user    User   @relation(fields: [userId], references: [id])
+  media   Media  @relation(fields: [mediaId], references: [id])
+}
+
+model FaceEmbedding {
+  id            String @id @default(cuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
+  faceId        String // ID from AWS Rekognition Collection
+  referenceImage String // S3 URL of the reference selfie
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // Target user
+  type      String   // LIKE, COMMENT, TAG, etc.
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

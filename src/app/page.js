@@ -1,65 +1,78 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Camera, Image as ImageIcon, Sparkles, Users } from "lucide-react";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col flex-1 items-center bg-[#0A0A0A]">
+      {/* Hero Section */}
+      <section className="w-full flex-1 flex flex-col items-center justify-center pt-32 pb-20 px-4 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141414] border border-white/[0.08] text-[#8B8B8B] text-sm mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Sparkles className="w-4 h-4 text-[#E8FF00]" />
+          <span>AI-Powered Event Media Management</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        
+        <h1 className="max-w-4xl font-heading text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+          Capture the moment.<br />
+          <span className="text-[#E8FF00]">We'll handle the rest.</span>
+        </h1>
+        
+        <p className="max-w-2xl text-lg md:text-xl text-[#8B8B8B] mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+          Centralize your club's memories. Organize photos seamlessly, find faces instantly with AI, and share albums with your community in a beautiful, premium gallery.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
+          <Link href="/events">
+            <Button size="lg" className="bg-[#E8FF00] text-black hover:bg-[#E8FF00]/90 h-14 px-8 text-base rounded-xl w-full sm:w-auto">
+              Explore Events
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button size="lg" variant="outline" className="border-white/[0.14] bg-white/[0.02] text-white hover:bg-white/[0.06] h-14 px-8 text-base rounded-xl w-full sm:w-auto">
+              Create an Account
+            </Button>
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Feature Section */}
+      <section className="w-full max-w-7xl px-4 py-24 mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Feature 1 */}
+          <div className="bg-[#141414] border border-white/[0.04] p-8 rounded-3xl transition-transform hover:-translate-y-1 duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-6">
+              <Camera className="w-6 h-6 text-[#E8FF00]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Event-wise Organization</h3>
+            <p className="text-[#8B8B8B] leading-relaxed">
+              Create dedicated spaces for your fests, workshops, and trips. Keep media organized and accessible.
+            </p>
+          </div>
+
+          {/* Feature 2 */}
+          <div className="bg-[#141414] border border-white/[0.04] p-8 rounded-3xl transition-transform hover:-translate-y-1 duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-6">
+              <Sparkles className="w-6 h-6 text-[#E8FF00]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">AI Face Recognition</h3>
+            <p className="text-[#8B8B8B] leading-relaxed">
+              Upload a selfie and let our AI instantly find every photo you appear in across all events.
+            </p>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="bg-[#141414] border border-white/[0.04] p-8 rounded-3xl transition-transform hover:-translate-y-1 duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-6">
+              <Users className="w-6 h-6 text-[#E8FF00]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Social Interactions</h3>
+            <p className="text-[#8B8B8B] leading-relaxed">
+              Like, comment, and share. Build a community around your shared memories with realtime notifications.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
